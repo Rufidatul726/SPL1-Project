@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1646419696 source:f:\spl1\spl\differentiation\take_input.c
+	"main.h"
+
+1646418866 f:\spl1\spl\differentiation\main.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<conio.h>
+
+1646419644 source:f:\spl1\spl\differentiation\main.c
+	"main.h"
+
+1646419681 source:f:\spl1\spl\differentiation\obj\handle_space.c
+	"../main.h"
+
