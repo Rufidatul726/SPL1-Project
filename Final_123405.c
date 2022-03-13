@@ -387,3 +387,33 @@ void simplification(char *a) {
 
 }
 
+
+void functions(char *input){
+    char func[100][100]={
+                            {"ln"},{"log"},{"sin"},{"cos"},{"cosec"},{"tan"},{"sec"},{"cot"},
+                            {"arcsin"},{"arccos"},{"arccosec"},{"arctan"},{"arcsec"},{"arccot"}
+    };
+    char var='x';
+    char oper[100][10]={
+                            {"+"},{"-"},{"*"},{"/"},{"^"},
+    };
+    char stack_pop[100]={"....."};
+
+
+    //find function
+    int length=strlen(input);
+    int k=0;
+    char temp_for_push[1000][100];
+    
+    for(int i=0;i<length;i++){
+        for(int j=0;j<strlen(func[k]);j++){
+            if(input[i]!=func[j]){
+                k++;
+                break;
+            }
+        }
+    }
+}
+
+
+
