@@ -6,7 +6,12 @@
 #define N 100000
 #define M 1000
 
-void function();
+void rulebook();
+int precedence(char);
+int func_name();
+int find_operator(char);
+int operator_name();
+int parenthesis_recognition();
 void take_input(char[]);
 void remove_space(char[]);
 int n_order_diff(char[]);
@@ -15,6 +20,13 @@ void bracket_handle(char[]);
 int functions(char[]);
 char **chain_rule(char[]);
 char *string_minimization(char[], int, int);
+
+struct stack{
+    char *left_node;
+    char *right_node;
+    char oper;
+
+};
 
 
 struct parenthesis_position{
@@ -30,11 +42,11 @@ struct part{
 }partitionOfString;
 
 int main(void){
-   function();
+   rulebook();
 
 }
 
-void function(){
+void rulebook(){
     char input[M];
     char stack_push[M][100];
 
@@ -48,25 +60,42 @@ void function(){
     delete_order(input,order);
     bracket_handle(input);
 
-    //printf("=>%s\n",input);
     int size= functions(input);
-    //int size=(sizeof(partitionOfString.countArray)/sizeof(partitionOfString.countArray[0]));
+
     for(int i=0;i<size;i++){
         printf("%s\t%c\n", partitionOfString.t_array[i], partitionOfString.stack_operator[i]);
     }
-    //strcpy(stack_push, chain_rule(input));
 
-    //partition(input, 0, strlen(input));
 }
+
+int precedence(char sign)
+{
+	if(sign == '^') return 3;
+    else if(sign == '*' || sign == '/') return 2;
+    else if(sign == '+' || sign == '-') return 1;
+    else return 0;
+}
+
+/*int func_name(int size){
+    int i;
+
+    for(i=0;i<size;i++){
+        if(precedence(partitionOfString.stack_operator[i])>=precedence(partitionOfString.stack_operator[i+1]))){
+
+        }
+    }
+
+}*/
 
 void take_input(char *input){
 
     //gets(input);
-    //strcpy(input,"d/dx(d/dx(d/dx(10 * x^122 + logx + x^x^ tanx - 3 * e^x + ln(sinx))))");
-    strcpy(input,"d/dx(10* x^3 + x^5 - 45 * (tanx) ^ 9+x^2+2*x+(tanx)^5+log(tan(5*x+2))+5*x-(tanx)^5+7*x^2-x+x-5*(tanx)^5)");
+    //strcpy(input,"d/dx(d/dx(d/dx(-10 * (-x)^122 + logx + x^x^ tanx - 3 * e^x + ln(sinx))))");
+    strcpy(input,"d/dx( x* (sin(log(x^5)))^ln(x)  + x^3 + x^x^x - 45 * ((tanx)*x) ^ 9+2*(sin(cos(-3*x+7*tanx)))+(tanx)^5+7*x^2-x+x-5*(tanx)^5)");
     return;
-
 }
+
+
 
 void remove_space(char *input){
     int i,j=0;
@@ -148,32 +177,60 @@ char **chain_rule(char *input){
 
 int functions(char *input){
     int i,j,count=0,p=0;
+    int sign;
+    int bracket =0;
     char func[50][20]={
                             {"ln"},{"log"},{"sin"},{"cos"},{"cosec"},{"tan"},{"sec"},{"cot"},
                             {"arcsin"},{"arccos"},{"arccosec"},{"arctan"},{"arcsec"},{"arccot"}
     };
     char var='x';
-    char oper[50]={ "+-*^" };
+   // char oper[50]={ "+-*^" };
 
     for(i=0;i<strlen(input);i++){
-            partitionOfString.t_array[count][p++]=input[i];
-        for(j=0;j<strlen(oper);j++){
-            if(input[i+1]==oper[j]){
+            sign = find_operator(input[i]);
+            if(sign!=0){
                 partitionOfString.countArray[count]=i;
-                partitionOfString.stack_operator[count]=oper[j];
+                partitionOfString.stack_operator[count]=input[i];
                 count++;
-                i++;
+               // i++;
+                p=0;
+            }
+
+            else partitionOfString.t_array[count][p++]=input[i];
+
+           if(input[i+1]=='('){
+                for(;;){
+                     partitionOfString.t_array[count][p++]=input[++i];
+
+                     if(input[i]=='(')bracket++;
+                     else if(input[i]==')')bracket--;
+                        if(bracket==0)break;
+
+                }
+                //partitionOfString.countArray[count]=i;
+                  sign = find_operator(input[i+1]);
+                if(sign!=0){
+                    partitionOfString.countArray[count]=i;
+                    partitionOfString.stack_operator[count]=input[i+1];
+                    count++;
+                    i++;
+                    p=0;
+                }
+                //break;
+            }
+            /*if(input[i+1]==')'){
+                partitionOfString.countArray[count]=i;
+                count++;
                 p=0;
                 break;
-            }
+            }*/
             if(i==strlen(input)-1){
                      partitionOfString.countArray[count]=i;
                      count++;
                     i++;
                     p=0;
-                    break;
             }
-        }
+
     }
 
     return count;
@@ -188,6 +245,16 @@ char *string_minimization(char *input, int start, int end){
     }
     temp[end]='\0';
     return temp;
+}
+
+int find_operator(char sign)
+{
+	if(sign == '^') return 5;
+    else if(sign == '*') return 4;
+    else if(sign == '/') return 3;
+    else if(sign == '+') return 2;
+    else if(sign == '-') return 1;
+    else return 0;
 }
 
 /*
