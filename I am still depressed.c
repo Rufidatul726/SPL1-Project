@@ -7,8 +7,11 @@
 #define M 1000
 
 void rulebook();
+void push(char, int);
+char pop(int top);
 int precedence(char);
-int func_name();
+int finding_const();
+
 int find_operator(char);
 int operator_name();
 int parenthesis_recognition();
@@ -17,9 +20,17 @@ void remove_space(char[]);
 int n_order_diff(char[]);
 void delete_order(char[], int);
 void bracket_handle(char[]);
-int functions(char[]);
+int stack_building(char[]);
 char **chain_rule(char[]);
 char *string_minimization(char[], int, int);
+void only_constant(char[], int);
+void sine(char[], int);
+void tangent(char[], int);
+void logarithm(char[], int);
+void exponential(char[], int);
+void only_var_x(char[], int);
+void find_function(int);
+//char constant(int index);
 
 struct stack{
     char *left_node;
@@ -28,6 +39,10 @@ struct stack{
 
 };
 
+struct constant{
+    int the_const[M];
+    int position[M];
+}constant;
 
 struct parenthesis_position{
     int stackstart[M];
@@ -38,6 +53,11 @@ struct parenthesis_position{
 struct part{
     int countArray[M];
     char t_array[M][M];
+    char func_derivative[M][M];
+   /* struct constant{
+        int number[M];
+        int position[M];
+    }number_c;*/
     char stack_operator[M];
 }partitionOfString;
 
@@ -60,42 +80,44 @@ void rulebook(){
     delete_order(input,order);
     bracket_handle(input);
 
-    int size= functions(input);
+    int size= stack_building(input);
+    find_function(size);
 
     for(int i=0;i<size;i++){
-        printf("%s\t%c\n", partitionOfString.t_array[i], partitionOfString.stack_operator[i]);
+        printf("%s\t%c\t%s\n", partitionOfString.t_array[i], partitionOfString.stack_operator[i], partitionOfString.func_derivative[i]);
     }
 
 }
 
-int precedence(char sign)
-{
+int precedence(char sign){
 	if(sign == '^') return 3;
     else if(sign == '*' || sign == '/') return 2;
     else if(sign == '+' || sign == '-') return 1;
     else return 0;
 }
 
-/*int func_name(int size){
+int finding_const(int size){
     int i;
+    int j;
 
     for(i=0;i<size;i++){
-        if(precedence(partitionOfString.stack_operator[i])>=precedence(partitionOfString.stack_operator[i+1]))){
-
+        if(partitionOfString.t_array[i][0]>='0' && partitionOfString.t_array[i][0]<='9'){
+            constant.the_const[j]= atoi(partitionOfString.t_array[i]);
+            constant.position[j]=i;
+            j++;
         }
+
     }
+    return j;
 
-}*/
-
-void take_input(char *input){
-
-    //gets(input);
-    //strcpy(input,"d/dx(d/dx(d/dx(-10 * (-x)^122 + logx + x^x^ tanx - 3 * e^x + ln(sinx))))");
-    strcpy(input,"d/dx( x* (sin(log(x^5)))^ln(x)  + x^3 + x^x^x - 45 * ((tanx)*x) ^ 9+2*(sin(cos(-3*x+7*tanx)))+(tanx)^5+7*x^2-x+x-5*(tanx)^5)");
-    return;
 }
 
-
+void take_input(char *input){
+    //gets(input);
+    strcpy(input,"d/dx(d/dx(d/dx(-10 * x^122 + logx + x^x^ tanx - 3 * e^x + sinx)))");
+    //strcpy(input,"d/dx( x* (sin(log(x^5)))^ln(x)  + x^3 + x^x^x - 45 * ((tanx)*x) ^ 9+2*(sin(cos(-3*x+7*tanx)))+(tanx)^5+7*x^2-x+x-5*(tanx)^5)");
+    return;
+}
 
 void remove_space(char *input){
     int i,j=0;
@@ -175,20 +197,20 @@ char **chain_rule(char *input){
 	}
 }
 
-int functions(char *input){
+int stack_building(char *input){
     int i,j,count=0,p=0;
     int sign;
     int bracket =0;
-    char func[50][20]={
-                            {"ln"},{"log"},{"sin"},{"cos"},{"cosec"},{"tan"},{"sec"},{"cot"},
-                            {"arcsin"},{"arccos"},{"arccosec"},{"arctan"},{"arcsec"},{"arccot"}
-    };
+
     char var='x';
    // char oper[50]={ "+-*^" };
 
     for(i=0;i<strlen(input);i++){
             sign = find_operator(input[i]);
-            if(sign!=0){
+            if(i==0 && sign!=0){
+                partitionOfString.t_array[count][p++]=input[i];
+            }
+            else if(sign!=0){
                 partitionOfString.countArray[count]=i;
                 partitionOfString.stack_operator[count]=input[i];
                 count++;
@@ -247,8 +269,7 @@ char *string_minimization(char *input, int start, int end){
     return temp;
 }
 
-int find_operator(char sign)
-{
+int find_operator(char sign){
 	if(sign == '^') return 5;
     else if(sign == '*') return 4;
     else if(sign == '/') return 3;
@@ -257,57 +278,90 @@ int find_operator(char sign)
     else return 0;
 }
 
-/*
 
-void find_bracket_to_stack(char *input, int N, char *temp[N]);{
-    int i,k=0,j=0;
-    //char temp[M][M];
-    for(i=0;i<strlen(input);i++){
-        temp[j][k++]=input[i];      //push
-        if(input[i+1]=='('){
-           j++;
-           k=0;                     //split
-        }
-        if(input[i+1]==')'){
-            j--;
-        }
+void find_function(int count){
+    int i,j,k;
+    char *func_names[] = {
+                            "ln","log","sin","cos","cosec","tan","sec","cot",
+                            "arcsin","arccos","arccosec","arctan","arcsec","arccot",
+                            "lnx","logx","sinx","cosx","cosecx","tanx","secx","cotx",
+                            "arcsinx","arccosx","arccosecx","arctanx","arcsecx","arccotx",
+                            "x"
+    };
+
+    for(i=0;i<count;i++){
+            //if(strcmp(func[j],partitionOfString.t_array[i])==0)
+            if((partitionOfString.t_array[i][0]>47 && partitionOfString.t_array[i][0]<58)  ||   partitionOfString.t_array[i][0]=='+' || partitionOfString.t_array[i][0]=='-'){
+                //int val= atoi(partitionOfString.t_array[i]);
+                only_constant(partitionOfString.t_array[i],i);
+            }
+            if(strcmp("sinx",partitionOfString.t_array[i])==0){
+                sine(partitionOfString.t_array[i], i);
+                //strcpy(partitionOfString.func_derivative[i],sine(partitionOfString.t_array[i]));
+               // strcpy(partitionOfString.func_derivative[i],"sinx");
+            }
+
+            else  if(strcmp("tanx",partitionOfString.t_array[i])==0){
+                tangent(partitionOfString.t_array[i], i);
+            }
+
+            else  if(strcmp("logx",partitionOfString.t_array[i])==0){
+                logarithm(partitionOfString.t_array[i], i);
+            }
+
+            else  if(strcmp("x",partitionOfString.t_array[i])==0){
+                only_var_x(partitionOfString.t_array[i], i);
+            }
+            else  if(strcmp("e",partitionOfString.t_array[i])==0){
+                exponential(partitionOfString.t_array[i], i);
+            }
+
+           /* else  if(strcmp("tanx",partitionOfString.t_array[i])==0){
+                //strcpy(partitionOfString.func_derivative[i],sine(partitionOfString.t_array[i]));
+                strcpy(partitionOfString.func_derivative[i],"(secx)^2");
+            }
+            else  if(strcmp("logx",partitionOfString.t_array[i])==0){
+                //strcpy(partitionOfString.func_derivative[i],sine(partitionOfString.t_array[i]));
+                strcpy(partitionOfString.func_derivative[i],"lna/x");
+            }
+            else  if(strcmp("lnx",partitionOfString.t_array[i])==0){
+                //strcpy(partitionOfString.func_derivative[i],sine(partitionOfString.t_array[i]));
+                strcpy(partitionOfString.func_derivative[i],"1/x");
+            }*/
+
     }
 }
 
-void differentiate(char *part_from_bracket){
-    int i,k=0,j=0;
 
 
-}
-*/
-/*void partition(char *input, int start, int end){
-    int i,j=0;
-
-    for(i=start;i<strlen(input);i++){
-        if(input[i+1]=='+' || input[i+1]=='-'  || input[i+1]=='\0')start_to_stack(input);
-    }
-
+void sine(char* input_part, int index){
+    strcpy(partitionOfString.func_derivative[index],"cosx");
 }
 
-void start_to_stack(char *input){
-    int i,j=0;
-
-
-}*/
-
-/*char *sine(char *input_part){
-    char *temp="cos(";
-    return  temp;
+void logarithm(char *input_part, int index){
+    strcpy(partitionOfString.func_derivative[index],"lna/x");
+    //*partitionOfString.func_derivative[index]="1/(lna*(......))";
 }
 
-char *cosine(char *input_part){
+void tangent(char *input_part, int index){
+    strcpy(partitionOfString.func_derivative[index],"(secx)^2");
+    //*partitionOfString.func_derivative[index]="(secx)^2";
+}
+
+void only_var_x(char *input_part, int index){
+    partitionOfString.func_derivative[index][0]='1';
+}
+
+void only_constant(char *input_part, int index){
+    partitionOfString.func_derivative[index][0]='0';
+}
+
+void exponential(char *input_part, int index){
+    strcpy(partitionOfString.func_derivative[index],"e^x");
+}
+
+void cosine(char *input_part){
     char *temp="-sin(......)";
-    return  temp;
-}
-
-char *tangent(char *input_part){
-    char *temp="(sec(......)^2)";
-    return  temp;
 }
 
 char *cosecant(char *input_part){
@@ -330,10 +384,3 @@ char *ln(char *input_part){
     return temp;
 }
 
-char *logarithm(char *input_part){
-    char *temp="1/(lna*(......))";
-    return temp;
-}
-
-
-*/
