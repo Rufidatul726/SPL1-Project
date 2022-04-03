@@ -40,6 +40,7 @@ struct stack{
 };
 
 struct constant{
+
     int the_const[M];
     int position[M];
 }constant;
