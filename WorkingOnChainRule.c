@@ -132,12 +132,12 @@ void oper_action(int index){
         if(partition.oper=='^')value3=value1^value2;
         char *temp=(char*)malloc(M*sizeof(char));
         sprintf(temp, "%d", value3);
-        strcat(output.out,"0");
+        strcat(output.out,"+0");
     }
 
     else if(partition.left_node[0]>47 && partition.left_node[0]<58){
-        length= strlen(output.out);
         strcat(output.out, partition.left_node);
+         length= strlen(output.out);
         output.out[length]=partition.oper;
         partition.left_node[length+1]='\0';
         strcat(output.out,partition.right_node);
@@ -145,13 +145,19 @@ void oper_action(int index){
 
     else{
         if(partition.oper=='+'){
-                length= strlen(output.out);
+            length= strlen(output.out);
+            output.out[length]='+';
+            output.out[length+1]='\0';
             strcat(output.out,partitionOfString.func_derivative[index]);
+            length= strlen(output.out);
             output.out[length]='+';
             output.out[length+1]='\0';
             strcat(output.out,partitionOfString.func_derivative[index+1]);
         }
         else if(partition.oper=='*'){
+            length= strlen(output.out);
+            output.out[length]='+';
+            output.out[length+1]='\0';
             strcat(output.out, partition.right_node);
             length= strlen(output.out);
             output.out[length]=partition.oper;
@@ -181,6 +187,8 @@ void func_precedence_implement(int size){
             oper_action(i);
             partition.left_node[0]='\0';
             partition.right_node[0]='\0';
+            printf("=%s\n",output.out);
+            i++;
         }
     }
 
@@ -189,15 +197,11 @@ void func_precedence_implement(int size){
 
 
 int main(){
-    //char *input={"x*(sin(log(x^5)))^ln(x)+x^3+x^x^x-45*((tanx)*x)^9+2*(sin(cos(-3*x+7*tanx)))+(tanx)^5+7*x^2-x+x-5*(tanx)^5)"};
     char *input={"x*tanx+sinx"};
     int size= stack_building(input);
     derivativeOfFunction(size);
     printf("%s\n", input);
-    //for(int i=0;i<size;i++){
-      //  printf("%s\t%c\t\t%s\n",partitionOfString.t_array[i], partitionOfString.stack_operator[i],partitionOfString.func_derivative[i]);
-    //}
     func_precedence_implement(size);
 
-    printf("=%s\n",output.out);
+   // printf("=%s\n",output.out);
 }
